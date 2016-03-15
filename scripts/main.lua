@@ -60,7 +60,6 @@ isInAreaOfInterest = function(robot_pos, goal_point_pos)
     -- Compute vector from goal point to robot position
     distance_vector = goal_point_pos - robot_pos
     distance = Point.len(distance_vector)
-    print(distance)
     if (distance <= radius) then
         return true
     end
@@ -122,7 +121,6 @@ if (sim_call_type == sim_childscriptcall_actuation) then
     end
 
     if(isInAreaOfInterest(robot_pos, goal_point_pos)) then
-        print("GOAL_REACHED")
         brake_force = 100
         motor_velocity = 0
         simSetJointForce(motor_handle, 0)
