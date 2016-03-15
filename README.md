@@ -26,3 +26,7 @@ In order to simulate an off road environment and guarantee a large dataset of po
 ### Building a classifier
 
 After collecting the results from the simulations, the final task is to analyze the dataset with the supervisors and investigate options to apply machine learning to automatically estimate whether a given area is traversable or not.
+
+## Planning
+
+![Planning](http://s27.postimg.org/w8bdbrl6b/timetable.png)
