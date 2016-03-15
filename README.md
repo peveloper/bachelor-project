@@ -21,7 +21,7 @@ The very first task is write a controller for the simulated robot (in such a way
 
 ### Building a 3d terrain
 
-In order to simulate an off road environment and guarantee a large dataset of possible terrain configurations that the robot will face, a large dataset of heightmaps will be built. The process of generating a 3d terrain in a procedu- ral way is based on the [Perlin Noise algorithm](https://en.wikipedia.org/wiki/Perlin_noise#Algorithm_detail).
+In order to simulate an off road environment and guarantee a large dataset of possible terrain configurations that the robot will face, a large dataset of heightmaps will be built. The process of generating a 3d terrain in a procedu- ral way is based on the [Perlin Noise](https://en.wikipedia.org/wiki/Perlin_noise#Algorithm_detail) algorithm.
 
 ### Building a classifier
 
