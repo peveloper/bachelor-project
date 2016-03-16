@@ -1,157 +1,140 @@
+-- Main script that loads the default scenario to handle simulations with a given heighfield
+
 package.path = package.path .. ";/Users/stefanopeverelli/Documents/usi/6ths/Bachelor Project/project/scripts/?.lua;"
 require 'point'
 
--- Convert a given table into a 3d vector
-toPoint = function(t)
-    local p = Point(t[1], t[2], t[3])
-    return p
+-- Get the Shape Bounding Box x y z coordinates
+getShapeMaxValues = function(shape_handle)
+    local localxMinMax = {0, 0}
+    local localyMinMax = {0, 0}
+    local localzMinMax = {0, 0}
+    result, localxMinMax[1] = simGetObjectFloatParameter(shape_handle, 15)
+    result, localyMinMax[1] = simGetObjectFloatParameter(shape_handle, 16)
+    result, localzMinMax[1] = simGetObjectFloatParameter(shape_handle, 17)
+    result, localxMinMax[2] = simGetObjectFloatParameter(shape_handle, 18)
+    result, localyMinMax[2] = simGetObjectFloatParameter(shape_handle, 19)
+    result, localzMinMax[2] = simGetObjectFloatParameter(shape_handle, 20)
+    local xSize = localxMinMax[2] - localxMinMax[1]
+    local ySize = localyMinMax[2] - localyMinMax[1]
+    local zSize = localzMinMax[2] - localzMinMax[1]
+    return {xSize, ySize, zSize}
 end
 
-if (sim_call_type==sim_childscriptcall_initialization) then
-    robot_handle = simGetObjectHandle('ROBOT')
-    goal_point_handle = simGetObjectHandle('GOAL')
-    steer_handle = simGetObjectHandle('steer_joint')
-    motor_handle = simGetObjectHandle('motor_joint')
-    fl_brake_handle = simGetObjectHandle('fl_brake_joint')
-    fr_brake_handle = simGetObjectHandle('fr_brake_joint')
-    bl_brake_handle = simGetObjectHandle('bl_brake_joint')
-    br_brake_handle = simGetObjectHandle('br_brake_joint')
-
-    --wheel radius:         0.09
-    --wheel base:             0.6
-    --wheel track:             0.35
-    --maximum steering rate:     70 deg/sec
-
-    --the maximum steer angle 30 degree
-    max_steer_angle = 0.5235987
-
-    --the maximum torque of the motor
-    motor_torque = 60
-
-    dVel = 1
-    dSteer = 0.1
-
-    --input steer
-    steer_angle = 0
-
-    --input velocity
-    motor_velocity = dVel*10
-
-    --input brake
-    brake_force = 0
-
-    -- Define an angle tolerance
-    epsilon = 0.02
-
-    -- Define a radius for the area of interest
-    radius = 0.3
-
-    -- Compute the plane normal between two arbitrary vectors
-    plane_normal = Point(1,1,0) ^ Point(1,2,0)
-    plane_normal = Point.normalize(plane_normal)
-
-    -- Get the goal position point
-    goal_point_pos = toPoint(simGetObjectPosition(goal_point_handle, -1))
-
+-- Compute a random coordinate between the bounding box of the shape
+getRandomCoordinate = function(max)
+    -- max is decremented to avoid the car to be place on the border
+    return math.random() + math.random(-(max/2) +1 ,  (max/2) -1)
 end
 
--- Check if the robot has reached the goal
-isInAreaOfInterest = function(robot_pos, goal_point_pos)
-    -- Compute vector from goal point to robot position
-    distance_vector = goal_point_pos - robot_pos
-    distance = Point.len(distance_vector)
-    if (distance <= radius) then
+-- Place the robot in a suitable position
+placeRobot = function(x, y, z)
+    robot_position = {getRandomCoordinate(x), getRandomCoordinate(y), z}
+    simSetObjectPosition(robot_handle, -1, robot_position)
+end
+
+-- Check if a point is contained in the plane
+-- x and y are the point's 2d coordinates and max_x and max_ y are the bounding plane coordinates
+isInPlane = function(x, y, z, max_x, max_y)
+    if(x <= (max_x/2) -1 and x >= -(max_x/2) +1) and (y <= (max_y/2) -1 and y >= -(max_y/2) +1) then
         return true
     end
 
     return false
 end
 
--- Convert the robot orientation into a directional vector
-toDirection = function(gamma)
-    local p = Point(-math.sin(gamma), math.cos(gamma), 0)
-    return p
+-- Compute a random angle between 0 and 2pi
+randomAngle = function()
+    return math.random() + math.random(0, 2 * math.pi)
 end
 
-correctSteer = function ()
-    -- Get current robot orientation
-    robot_dir = toDirection(simGetObjectOrientation(robot_handle, -1)[3])
-
-    -- Get current robot position
-    robot_pos = toPoint(simGetObjectPosition(robot_handle,-1))
-
-    -- Compute the ideal path to follow
-    goal_point_pos = toPoint(simGetObjectPosition(goal_point_handle, -1))
-    local ideal_path = -robot_pos + goal_point_pos
-
-    -- Compute the signed angle between the robot_direction and the ideal path to reach the goal
-    local angle = math.acos(Point.normalize(robot_dir) .. Point.normalize(ideal_path))
-    local cross = robot_dir ^ ideal_path
-    local c = cross .. plane_normal
-
-    if (c < 0) then
-        angle = -angle
-    end
-
-    return angle
+-- Place the goal point at a distance d from the robot position that lies in the part of circle in the bounding plane
+placePoint = function(d)
+    angle = randomAngle()
+    x = math.sin(angle) * d
+    y = math.cos(angle) * d
+    z = 0
+    return {x, y, z}
 end
 
-if (sim_call_type == sim_childscriptcall_cleanup) then
-
+-- Initialization part (executed just once, at simulation start) ---------
+if (sim_call_type == sim_mainscriptcall_initialization) then
+    simOpenModule(sim_handle_all)
+    simHandleGraph(sim_handle_all_except_explicit, 0)
+    simCreatePath(-1)
+    point_handle = simGetObjectHandle('Path')
+    simSetObjectName(point_handle, 'GOAL')
+    simLoadModel('/Users/stefanopeverelli/Documents/dev/V-REP_PRO_EDU_V3_3_0_Mac/models/vehicles/offroad.ttm')
+    robot_handle = simGetObjectHandle('ROBOT')
+    heightfield_handle = simGetObjectHandle('heightfield')
+    max_x = getShapeMaxValues(heightfield_handle)[1]
+    max_y = getShapeMaxValues(heightfield_handle)[2]
+    max_z = getShapeMaxValues(heightfield_handle)[3]
+    placeRobot(max_x, max_y, max_z)
+    distance = 5
+    while not isInPlane(placePoint(distance)) do
+        point_position = placePoint(distance)
+    end
+    simSetObjectPosition(point_handle, point_position)
 end
 
-if (sim_call_type == sim_childscriptcall_actuation) then
-    --current steer pos
-    steer_pos = simGetJointPosition(steer_handle, -1);
-    --current angular velocity of back left wheel
-    bl_wheel_velocity = simGetObjectFloatParameter(bl_brake_handle,sim_jointfloatparam_velocity)
-    --current angular velocity of back right wheel
-    br_wheel_velocity = simGetObjectFloatParameter(br_brake_handle,sim_jointfloatparam_velocity)
-    --average angular velocity of the back wheels
-    rear_wheel_velocity = (bl_wheel_velocity+br_wheel_velocity)/2
-    --linear velocity
-    linear_velocity = rear_wheel_velocity*0.09
+-- Regular part (executed at each simulation step) -----------------------
+if (sim_call_type == sim_mainscriptcall_regular) then
+    -- "Actuation"-part --
+    simResumeThreads(sim_scriptthreadresume_default)
+    simResumeThreads(sim_scriptthreadresume_actuation_first)
+    simLaunchThreadedChildScripts()
+    simHandleChildScripts(sim_childscriptcall_actuation)
+    simResumeThreads(sim_scriptthreadresume_actuation_last)
+    simHandleCustomizationScripts(sim_customizationscriptcall_simulationactuation)
+    simHandleModule(sim_handle_all, false)
+    simHandleJoint(sim_handle_all_except_explicit, simGetSimulationTimeStep()) -- DEPRECATED
+    simHandlePath(sim_handle_all_except_explicit, simGetSimulationTimeStep()) -- DEPRECATED
+    simHandleMechanism(sim_handle_all_except_explicit)
+    simHandleIkGroup(sim_handle_all_except_explicit)
+    simHandleDynamics(simGetSimulationTimeStep())
+    simHandleVarious()
+    simHandleMill(sim_handle_all_except_explicit)
 
-    angle = correctSteer()
-    if (math.abs(angle) >= epsilon) then
-        steer_angle = angle
-        angle = correctSteer()
-    else
-        steer_angle = 0
+    -- "Sensing"-part --
+    workThreadCount = simGetInt32Parameter(sim_intparam_work_thread_count)
+    coreCount = simGetInt32Parameter(sim_intparam_core_count)
+    if (workThreadCount < 0) then
+        workThreadCount = coreCount -- auto setting: thread count = core count
+        if (workThreadCount < 2) then
+            workThreadCount = 0 -- turn work threads off if less than 2 cores
+        end
     end
-
-    if(isInAreaOfInterest(robot_pos, goal_point_pos)) then
-        brake_force = 100
-        motor_velocity = 0
-        simSetJointForce(motor_handle, 0)
+    simEnableWorkThreads(workThreadCount) -- thread count can be changed on-the-fly.
+    startTime1 = simGetSystemTimeInMilliseconds()
+    simHandleCollision(sim_handle_all_except_explicit)
+    simHandleDistance(sim_handle_all_except_explicit)
+    simHandleProximitySensor(sim_handle_all_except_explicit)
+    startTime2 = simGetSystemTimeInMilliseconds()
+    simHandleVisionSensor(sim_handle_all_except_explicit)
+    timeDiff2 = simGetSystemTimeInMilliseconds(startTime2)
+    simWaitForWorkThreads()
+    timeDiff = simGetSystemTimeInMilliseconds(startTime1)-timeDiff2
+    if (workThreadCount == 0) then
+        timeDiff = 0
     end
+    simSetInt32Parameter(sim_intparam_work_thread_calc_time_ms, timeDiff)
+    simResumeThreads(sim_scriptthreadresume_sensing_first)
+    simHandleChildScripts(sim_childscriptcall_sensing)
+    simResumeThreads(sim_scriptthreadresume_sensing_last)
+    simHandleCustomizationScripts(sim_customizationscriptcall_simulationsensing)
+    simHandleModule(sim_handle_all, true)
+    simResumeThreads(sim_scriptthreadresume_allnotyetresumed)
+    simHandleGraph(sim_handle_all_except_explicit, simGetSimulationTime()+simGetSimulationTimeStep())
+end
 
-    if (math.abs(motor_velocity) < dVel * 0.1) then
-        brake_force = 100
-    else
-        brake_force = 0
-    end
-
-    --set maximum steer angle
-    if (steer_angle > max_steer_angle) then
-        steer_angle = max_steer_angle
-    end
-    if (steer_angle < - max_steer_angle) then
-        steer_angle = -max_steer_angle
-    end
-
-    simSetJointTargetPosition(steer_handle, steer_angle)
-
-    --brake and motor can not be applied at the same time
-    if(brake_force > 0) then
-        simSetJointForce(motor_handle, 0)
-    else
-        simSetJointForce(motor_handle, motor_torque)
-        simSetJointTargetVelocity(motor_handle, motor_velocity)
-    end
-
-    simSetJointForce(fr_brake_handle, brake_force)
-    simSetJointForce(fl_brake_handle, brake_force)
-    simSetJointForce(bl_brake_handle, brake_force)
-    simSetJointForce(br_brake_handle, brake_force)
+-- Clean-up part (executed just once, before simulation ends) ------------
+if (sim_call_type == sim_mainscriptcall_cleanup) then
+    simEnableWorkThreads(0)
+    simResetMilling(sim_handle_all)
+    simResetMill(sim_handle_all_except_explicit)
+    simResetCollision(sim_handle_all_except_explicit)
+    simResetDistance(sim_handle_all_except_explicit)
+    simResetProximitySensor(sim_handle_all_except_explicit)
+    simResetVisionSensor(sim_handle_all_except_explicit)
+    simCloseModule(sim_handle_all)
 end
