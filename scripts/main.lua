@@ -42,28 +42,35 @@ isInPlane = function(coords, max_x, max_y)
     return false
 end
 
--- Compute a random angle between 0 and 2pi
-randomAngle = function()
-    return math.random() + math.random(0, 2 * math.pi)
+-- Convert a given table into a 3d vector
+toPoint = function(t)
+    local p = Point(t[1], t[2], t[3])
+    return p
 end
 
--- Place the goal point at a distance d from the robot position that lies in the part of circle in the bounding plane
-placePoint = function(d, robot_x, robot_y)
-    angle = randomAngle()
-    x = math.sin(angle) * d + robot_x
-    y = math.cos(angle) * d + robot_y
-    z = 0
-    return {x, y, z}
+-- Convert the robot orientation into a directional vector
+toDirection = function(gamma)
+    local p = Point(-math.sin(gamma), math.cos(gamma), 0)
+    return p
+end
+
+-- Place the goal point at distance d in front of the robot
+placePoint = function(d, robot_direction, robot_position)
+    return (d * robot_direction) + robot_position
 end
 
 -- Initialization part (executed just once, at simulation start) ---------
 if (sim_call_type == sim_mainscriptcall_initialization) then
     simOpenModule(sim_handle_all)
     simHandleGraph(sim_handle_all_except_explicit, 0)
+
+    -- Get heightfield bounding box information
     heightfield_handle = simGetObjectHandle('heightfield')
     max_x = getShapeMaxValues(heightfield_handle)[1]
     max_y = getShapeMaxValues(heightfield_handle)[2]
     max_z = getShapeMaxValues(heightfield_handle)[3]
+
+    -- Construct the goal point
     intParams = {20, 0, 0}
     floatParams = {0.2, 0, 0}
     simCreatePath(1, intParams, floatParams, nil)
@@ -73,17 +80,33 @@ if (sim_call_type == sim_mainscriptcall_initialization) then
     simInsertPathCtrlPoints(path_handle, 0, 0, 1, ctrlPoint1);
     simInsertPathCtrlPoints(path_handle, 0, 0, 1, ctrlPoint2);
     simSetObjectName(path_handle, 'GOAL')
+
+    -- Load the offroad mantra model with its associated script (controller)
     simLoadModel('/Users/stefanopeverelli/Documents/dev/V-REP_PRO_EDU_V3_3_0_Mac/models/vehicles/offroad.ttm')
     robot_handle = simGetObjectHandle('ROBOT')
-        placeRobot(max_x, max_y, max_z)
-    distance = 5
+
+    -- Robot pose
+    placeRobot(max_x, max_y, max_z)
     robot_position = simGetObjectPosition(robot_handle, -1)
-    point_position = placePoint(distance, robot_position[1], robot_position[2])
+    robot_position[3] = 0
+    robot_position = toPoint(robot_position)
+    robot_direction = toDirection(simGetObjectOrientation(robot_handle, -1)[3])
+
+    -- Goal point pose at distance d from the robot (NOTE distance cannot be bigger than the sqrt(max_x) + 1)
+    distance = 6
+    point_position = {Point.get(placePoint(distance, robot_direction, robot_position))}
+    print(toPoint(point_position))
+    print(isInPlane(point_position, max_x, max_y))
+
     while not (isInPlane(point_position, max_x, max_y)) do
-        point_position = placePoint(distance, robot_position[1], robot_position[2])
-        print(point_position[1] .. " " .. point_position[2])
+        placeRobot(max_x, max_y, max_z)
+        robot_position = simGetObjectPosition(robot_handle, -1)
+        robot_position[3] = 0
+        robot_position = toPoint(robot_position)
+        robot_direction = toDirection(simGetObjectOrientation(robot_handle, -1)[3])
+        point_position = {Point.get(placePoint(distance, robot_direction, robot_position))}
     end
-    print(point_position[1] .. " " .. point_position[2])
+
     simSetObjectPosition(path_handle, -1, point_position)
 end
 
