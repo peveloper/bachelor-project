@@ -23,7 +23,7 @@ end
 -- Compute a random coordinate between the bounding box of the shape
 getRandomCoordinate = function(max)
     -- max is decremented to avoid the car to be place on the border
-    return math.random() + math.random(-(max/2) +1 ,  (max/2) -1)
+    return math.random() + math.random(-(max/2) +2 ,  (max/2) -2)
 end
 
 -- Place the robot in a suitable position
@@ -34,8 +34,8 @@ end
 
 -- Check if a point is contained in the plane
 -- x and y are the point's 2d coordinates and max_x and max_ y are the bounding plane coordinates
-isInPlane = function(x, y, z, max_x, max_y)
-    if(x <= (max_x/2) -1 and x >= -(max_x/2) +1) and (y <= (max_y/2) -1 and y >= -(max_y/2) +1) then
+isInPlane = function(coords, max_x, max_y)
+    if(coords[1] <= (max_x/2) -2 and coords[1] >= -(max_x/2) +2) and (coords[2] <= (max_y/2) -2 and coords[2] >= -(max_y/2) +2) then
         return true
     end
 
@@ -48,10 +48,10 @@ randomAngle = function()
 end
 
 -- Place the goal point at a distance d from the robot position that lies in the part of circle in the bounding plane
-placePoint = function(d)
+placePoint = function(d, robot_x, robot_y)
     angle = randomAngle()
-    x = math.sin(angle) * d
-    y = math.cos(angle) * d
+    x = math.sin(angle) * d + robot_x
+    y = math.cos(angle) * d + robot_y
     z = 0
     return {x, y, z}
 end
@@ -60,21 +60,31 @@ end
 if (sim_call_type == sim_mainscriptcall_initialization) then
     simOpenModule(sim_handle_all)
     simHandleGraph(sim_handle_all_except_explicit, 0)
-    simCreatePath(-1)
-    point_handle = simGetObjectHandle('Path')
-    simSetObjectName(point_handle, 'GOAL')
-    simLoadModel('/Users/stefanopeverelli/Documents/dev/V-REP_PRO_EDU_V3_3_0_Mac/models/vehicles/offroad.ttm')
-    robot_handle = simGetObjectHandle('ROBOT')
     heightfield_handle = simGetObjectHandle('heightfield')
     max_x = getShapeMaxValues(heightfield_handle)[1]
     max_y = getShapeMaxValues(heightfield_handle)[2]
     max_z = getShapeMaxValues(heightfield_handle)[3]
-    placeRobot(max_x, max_y, max_z)
+    intParams = {20, 0, 0}
+    floatParams = {0.2, 0, 0}
+    simCreatePath(1, intParams, floatParams, nil)
+    path_handle = simGetObjectHandle('Path', -1)
+    ctrlPoint1 = {0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1}
+    ctrlPoint2 = {0, 0, max_z, 0, 0, 0, 1, 0, 0, 1, 1}
+    simInsertPathCtrlPoints(path_handle, 0, 0, 1, ctrlPoint1);
+    simInsertPathCtrlPoints(path_handle, 0, 0, 1, ctrlPoint2);
+    simSetObjectName(path_handle, 'GOAL')
+    simLoadModel('/Users/stefanopeverelli/Documents/dev/V-REP_PRO_EDU_V3_3_0_Mac/models/vehicles/offroad.ttm')
+    robot_handle = simGetObjectHandle('ROBOT')
+        placeRobot(max_x, max_y, max_z)
     distance = 5
-    while not isInPlane(placePoint(distance)) do
-        point_position = placePoint(distance)
+    robot_position = simGetObjectPosition(robot_handle, -1)
+    point_position = placePoint(distance, robot_position[1], robot_position[2])
+    while not (isInPlane(point_position, max_x, max_y)) do
+        point_position = placePoint(distance, robot_position[1], robot_position[2])
+        print(point_position[1] .. " " .. point_position[2])
     end
-    simSetObjectPosition(point_handle, point_position)
+    print(point_position[1] .. " " .. point_position[2])
+    simSetObjectPosition(path_handle, -1, point_position)
 end
 
 -- Regular part (executed at each simulation step) -----------------------

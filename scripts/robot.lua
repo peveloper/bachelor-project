@@ -44,7 +44,7 @@ if (sim_call_type==sim_childscriptcall_initialization) then
     epsilon = 0.02
 
     -- Define a radius for the area of interest
-    radius = 0.3
+    radius = 0.7
 
     -- Compute the plane normal between two arbitrary vectors
     plane_normal = Point(1,1,0) ^ Point(1,2,0)
@@ -125,6 +125,7 @@ if (sim_call_type == sim_childscriptcall_actuation) then
         brake_force = 100
         motor_velocity = 0
         simSetJointForce(motor_handle, 0)
+        simStopSimulation()
     end
 
     if (math.abs(motor_velocity) < dVel * 0.1) then
