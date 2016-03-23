@@ -1,6 +1,6 @@
 -- Main script that loads the default scenario to handle simulations with a given heighfield
 
-package.path = package.path .. ";/Users/stefanopeverelli/Documents/usi/6ths/Bachelor Project/project/scripts/?.lua;"
+package.path = package.path .. ";/Users/stefanopeverelli/Documents/usi/6ths/Bachelor Project/scripts/?.lua;"
 require 'point'
 
 -- Get the Shape Bounding Box x y z coordinates
@@ -82,7 +82,7 @@ if (sim_call_type == sim_mainscriptcall_initialization) then
     simSetObjectName(path_handle, 'GOAL')
 
     -- Load the offroad mantra model with its associated script (controller)
-    simLoadModel('/Users/stefanopeverelli/Documents/dev/V-REP_PRO_EDU_V3_3_0_Mac/models/vehicles/offroad.ttm')
+    simLoadModel('/Users/stefanopeverelli/Documents/usi/6ths/Bachelor Project/models/offroad.ttm')
     robot_handle = simGetObjectHandle('ROBOT')
 
     -- Robot pose

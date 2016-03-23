@@ -1,4 +1,5 @@
-package.path = package.path .. ";/Users/stefanopeverelli/Documents/usi/6ths/Bachelor Project/project/scripts/?.lua;"
+package.path = package.path .. ";/Users/stefanopeverelli/Documents/usi/6ths/Bachelor Project/scripts/?.lua;"
+
 require 'point'
 
 -- Convert a given table into a 3d vector
@@ -17,6 +18,8 @@ if (sim_call_type==sim_childscriptcall_initialization) then
     bl_brake_handle = simGetObjectHandle('bl_brake_joint')
     br_brake_handle = simGetObjectHandle('br_brake_joint')
 
+    print(simGetStringParameter(sim_stringparam_app_arg1))
+
     --wheel radius:         0.09
     --wheel base:             0.6
     --wheel track:             0.35
@@ -28,7 +31,9 @@ if (sim_call_type==sim_childscriptcall_initialization) then
     --the maximum torque of the motor
     motor_torque = 60
 
-    dVel = 1
+    --dVel = simGetScriptSimulationParameter(sim_handle_self, 'dVel')
+
+    dVel =1
     dSteer = 0.1
 
     --input steer
