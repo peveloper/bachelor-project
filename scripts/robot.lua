@@ -18,8 +18,6 @@ if (sim_call_type==sim_childscriptcall_initialization) then
     bl_brake_handle = simGetObjectHandle('bl_brake_joint')
     br_brake_handle = simGetObjectHandle('br_brake_joint')
 
-    print(simGetStringParameter(sim_stringparam_app_arg1))
-
     --wheel radius:         0.09
     --wheel base:             0.6
     --wheel track:             0.35
@@ -31,9 +29,14 @@ if (sim_call_type==sim_childscriptcall_initialization) then
     --the maximum torque of the motor
     motor_torque = 60
 
-    --dVel = simGetScriptSimulationParameter(sim_handle_self, 'dVel')
+    -- Read the robot velocity
+    dVel = simGetStringParameter(sim_stringparam_app_arg1)
 
-    dVel =1
+
+    if (dVel == "") then
+        dVel = 1.0
+    end
+
     dSteer = 0.1
 
     --input steer
@@ -50,6 +53,13 @@ if (sim_call_type==sim_childscriptcall_initialization) then
 
     -- Define a radius for the area of interest
     radius = 0.7
+
+    -- Read the maximum time for the simulation
+    max_sim_time = simGetStringParameter(sim_stringparam_app_arg2)
+
+    if (max_sim_time == "") then
+        max_sim_time = 20
+    end
 
     -- Compute the plane normal between two arbitrary vectors
     plane_normal = Point(1,1,0) ^ Point(1,2,0)
@@ -117,6 +127,10 @@ if (sim_call_type == sim_childscriptcall_actuation) then
     rear_wheel_velocity = (bl_wheel_velocity+br_wheel_velocity)/2
     --linear velocity
     linear_velocity = rear_wheel_velocity*0.09
+
+    if (simGetSimulationTime() >= tonumber(max_sim_time)) then
+        simStopSimulation()
+    end
 
     angle = correctSteer()
     if (math.abs(angle) >= epsilon) then

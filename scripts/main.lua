@@ -95,8 +95,6 @@ if (sim_call_type == sim_mainscriptcall_initialization) then
     -- Goal point pose at distance d from the robot (NOTE distance cannot be bigger than the sqrt(max_x) + 1)
     distance = 6
     point_position = {Point.get(placePoint(distance, robot_direction, robot_position))}
-    print(toPoint(point_position))
-    print(isInPlane(point_position, max_x, max_y))
 
     while not (isInPlane(point_position, max_x, max_y)) do
         placeRobot(max_x, max_y, max_z)
