@@ -92,7 +92,7 @@ if (sim_call_type == sim_mainscriptcall_initialization) then
     robot_position = toPoint(robot_position)
     robot_direction = toDirection(simGetObjectOrientation(robot_handle, -1)[3])
 
-    -- Goal point pose at distance d from the robot (NOTE distance cannot be bigger than the sqrt(max_x) + 1)
+    -- Goal point pose at distance d from the robot (NOTE distance cannot be bigger than the sqrt((max_x - 4) ^ 2 + (max_y - 4)^ 2) - 2)
     distance = 6
     point_position = {Point.get(placePoint(distance, robot_direction, robot_position))}
 
