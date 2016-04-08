@@ -8,9 +8,80 @@ toPoint = function(t)
     return p
 end
 
+-- Get the Shape Bounding Box x y z coordinates
+getShapeMaxValues = function(shape_handle)
+    local localxMinMax = {0, 0}
+    local localyMinMax = {0, 0}
+    local localzMinMax = {0, 0}
+    result, localxMinMax[1] = simGetObjectFloatParameter(shape_handle, 15)
+    result, localyMinMax[1] = simGetObjectFloatParameter(shape_handle, 16)
+    result, localzMinMax[1] = simGetObjectFloatParameter(shape_handle, 17)
+    result, localxMinMax[2] = simGetObjectFloatParameter(shape_handle, 18)
+    result, localyMinMax[2] = simGetObjectFloatParameter(shape_handle, 19)
+    result, localzMinMax[2] = simGetObjectFloatParameter(shape_handle, 20)
+    local xSize = localxMinMax[2] - localxMinMax[1]
+    local ySize = localyMinMax[2] - localyMinMax[1]
+    local zSize = localzMinMax[2] - localzMinMax[1]
+    return {xSize, ySize, zSize}
+end
+
+-- Used to escape "'s by toCSV
+escapeCSV = function (s)
+    if string.find(s, '[,"]') then
+      s = '"' .. string.gsub(s, '"', '""') .. '"'
+    end
+    return s
+end
+
+-- Convert from table to CSV string
+toCSV = function (tt)
+    local s = ""
+    for _,p in ipairs(tt) do
+        s = s .. ", " .. escapeCSV(p)
+    end
+    return string.sub(s, 3)      -- remove first comma
+end
+
+toScreenCoords = function (point, x_max, x_min, y_max, y_min)
+    xs = (1 / (x_max - x_min)) * (point[1] - x_min)
+    ys = (1 / (y_max - y_min)) * (point[2] - y_max)
+    p = {xs, ys, 0}
+    return toPoint(p)
+end
+
+function round(num, idp)
+  return tonumber(string.format("%." .. (idp or 0) .. "f", num))
+end
+
+saveData = function (traversed)
+    if not saved then
+        local record = {
+            traversed,
+            round(elapsed_time, 3),
+            Point.__tostring(toScreenCoords(initial_point_pos, max_x / 2, -max_x / 2, max_y / 2, -max_y / 2 )),
+            Point.__tostring(toScreenCoords(initial_robot_pos, max_x / 2, -max_x / 2, max_y / 2, -max_y / 2 )),
+            Point.__tostring(toScreenCoords(final_robot_pos, max_x / 2, -max_x / 2, max_y / 2, -max_y / 2 )),
+        }
+        output_file = io.open("/Users/stefanopeverelli/Documents/usi/6ths/Bachelor Project/data/results.csv", "a")
+        io.output(output_file)
+        io.write(toCSV(record) .. "\n")
+        io.close(output_file)
+        saved = true
+    end
+end
+
+-- Convert the robot orientation into a directional vector
+toDirection = function(gamma)
+    local p = Point(-math.sin(gamma), math.cos(gamma), 0)
+    return p
+end
+
+
+
 if (sim_call_type==sim_childscriptcall_initialization) then
     robot_handle = simGetObjectHandle('ROBOT')
     goal_point_handle = simGetObjectHandle('GOAL')
+    heightfield_handle = simGetObjectHandle('heightfield')
     steer_handle = simGetObjectHandle('steer_joint')
     motor_handle = simGetObjectHandle('motor_joint')
     fl_brake_handle = simGetObjectHandle('fl_brake_joint')
@@ -30,8 +101,7 @@ if (sim_call_type==sim_childscriptcall_initialization) then
     motor_torque = 60
 
     -- Read the robot velocity
-    dVel = simGetStringParameter(sim_stringparam_app_arg1)
-
+    dVel = simGetStringParameter(sim_stringparam_app_arg2)
 
     if (dVel == "") then
         dVel = 1.0
@@ -54,11 +124,15 @@ if (sim_call_type==sim_childscriptcall_initialization) then
     -- Define a radius for the area of interest
     radius = 0.7
 
+    traversed = 0
+
+    saved = false
+
     -- Read the maximum time for the simulation
-    max_sim_time = simGetStringParameter(sim_stringparam_app_arg2)
+    max_sim_time = simGetStringParameter(sim_stringparam_app_arg3)
 
     if (max_sim_time == "") then
-        max_sim_time = 20
+        max_sim_time = 10
     end
 
     -- Compute the plane normal between two arbitrary vectors
@@ -67,6 +141,22 @@ if (sim_call_type==sim_childscriptcall_initialization) then
 
     -- Get the goal position point
     goal_point_pos = toPoint(simGetObjectPosition(goal_point_handle, -1))
+
+    -- Get the initial goal point position
+    initial_point_pos = goal_point_pos
+
+    -- Get the initial robot position
+    initial_robot_pos = toPoint(simGetObjectPosition(robot_handle, -1))
+
+    -- Get the initial robot orientation
+    robot_direction = toDirection(simGetObjectOrientation(robot_handle, -1)[3])
+
+
+    -- The final position is initialized as the start position 
+    final_point_pos = initial_point_pos
+
+    max_x = getShapeMaxValues(heightfield_handle)[1]
+    max_y = getShapeMaxValues(heightfield_handle)[2]
 
 end
 
@@ -82,11 +172,6 @@ isInAreaOfInterest = function(robot_pos, goal_point_pos)
     return false
 end
 
--- Convert the robot orientation into a directional vector
-toDirection = function(gamma)
-    local p = Point(-math.sin(gamma), math.cos(gamma), 0)
-    return p
-end
 
 -- Correct the direction of the robot in order to reach the goal point
 correctSteer = function ()
@@ -128,7 +213,11 @@ if (sim_call_type == sim_childscriptcall_actuation) then
     --linear velocity
     linear_velocity = rear_wheel_velocity*0.09
 
-    if (simGetSimulationTime() >= tonumber(max_sim_time)) then
+    elapsed_time = simGetSimulationTime()
+
+    if (elapsed_time >= tonumber(max_sim_time)) then
+        final_robot_pos = toPoint(simGetObjectPosition(robot_handle, -1))
+        saveData(traversed)
         simStopSimulation()
     end
 
@@ -144,6 +233,9 @@ if (sim_call_type == sim_childscriptcall_actuation) then
         brake_force = 100
         motor_velocity = 0
         simSetJointForce(motor_handle, 0)
+        final_robot_pos = toPoint(simGetObjectPosition(robot_handle, -1))
+        traversed = 1
+        saveData(traversed)
         simStopSimulation()
     end
 

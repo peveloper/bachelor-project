@@ -28,8 +28,13 @@ end
 
 -- Place the robot in a suitable position
 placeRobot = function(x, y, z)
-    robot_position = {getRandomCoordinate(x), getRandomCoordinate(y), z}
+    local robot_position = {getRandomCoordinate(x), getRandomCoordinate(y), z}
+    local robot_orientation = simGetObjectOrientation(robot_handle, -1)
     simSetObjectPosition(robot_handle, -1, robot_position)
+    local gamma = math.rad(math.random() + math.random(360))
+    robot_orientation[3] = gamma
+    simSetObjectOrientation(robot_handle, -1, robot_orientation)
+
 end
 
 -- Check if a point is contained in the plane
@@ -93,7 +98,11 @@ if (sim_call_type == sim_mainscriptcall_initialization) then
     robot_direction = toDirection(simGetObjectOrientation(robot_handle, -1)[3])
 
     -- Goal point pose at distance d from the robot (NOTE distance cannot be bigger than the sqrt((max_x - 4) ^ 2 + (max_y - 4)^ 2) - 2)
-    distance = 6
+    max_distance = math.sqrt((max_x - 4) ^ 2 + (max_y - 4)^ 2) - math.sqrt(max_x - 4) - 1
+    distance = simGetStringParameter(sim_stringparam_app_arg1)
+    if (distance == "" or tonumber(distance) >= max_distance) then
+        distance = math.sqrt(max_x)
+    end
     point_position = {Point.get(placePoint(distance, robot_direction, robot_position))}
 
     while not (isInPlane(point_position, max_x, max_y)) do
