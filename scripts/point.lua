@@ -83,7 +83,7 @@ function Point.translate(pt,x,y,z)
 end
 
 function Point.__tostring(p)
-  return string.format('(%f,%f,%f)',p[1],p[2],p[3])
+  return string.format('%f,%f,%f',p[1],p[2],p[3])
 end
 
 local function sqr(x) return x*x end
