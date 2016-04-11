@@ -58,9 +58,9 @@ saveData = function (traversed)
         local record = {
             traversed,
             round(elapsed_time, 3),
-            Point.__tostring(toScreenCoords(initial_point_pos, max_x / 2, -max_x / 2, max_y / 2, -max_y / 2 )),
-            Point.__tostring(toScreenCoords(initial_robot_pos, max_x / 2, -max_x / 2, max_y / 2, -max_y / 2 )),
-            Point.__tostring(toScreenCoords(final_robot_pos, max_x / 2, -max_x / 2, max_y / 2, -max_y / 2 )),
+            Point.__tostring(toScreenCoords(initial_point_pos, max_x / 2, -max_x / 2, max_y / 2, -max_y / 2 ), true),
+            Point.__tostring(toScreenCoords(initial_robot_pos, max_x / 2, -max_x / 2, max_y / 2, -max_y / 2 ), true),
+            Point.__tostring(toScreenCoords(final_robot_pos, max_x / 2, -max_x / 2, max_y / 2, -max_y / 2 ), true),
         }
         output_file = io.open("/Users/stefanopeverelli/Documents/usi/6ths/Bachelor Project/data/results.csv", "a")
         io.output(output_file)
