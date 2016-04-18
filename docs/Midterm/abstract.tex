@@ -1,0 +1,24 @@
+\documentclass{article}[12pt]
+\begin{document}
+\title{Bachelor Project - Abstract}
+\author{Stefano Peverelli}
+\date{\today}
+\maketitle
+Unmanned vehicle navigation is a core topic in robotics, thus the need for an intelligent system to 
+address the issue of path planning for ground robots on offroad terrain. \\
+The planned approach expects two main phases: the first one is to simulate an offroad wheeled
+ground robot that traverses a 3d given terrain model in a virtual environment, analyze in which areas it
+got stuck or capsized, and collect data from the simulations to obtain an extensive
+dataset of possible outcomes, which comprehends various information such as the elapsed time,
+whether the robot has traversed the patch or not, the goal's position and the robot's initial and
+final position. \\
+The second phase instead aims to analyze the resulting dataset and use it to train a neural network,
+which final goal is, as mentioned above, to foretell the \textit{traversabiity} of a terrain (by its 3d structure),
+planning a path the robot can traverse.
+By using an approach based on machine learning, there's no need to manually define heuristic
+rules to predict the traversability of terrain patches; moreover, the approach is applicable
+to any type of ground robot (wheeled/legged) as long as it can be reliably simulated.
+\end{document}
+
+
+
