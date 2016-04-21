@@ -77,7 +77,7 @@ def parse_record(row, line, width, height, i_img_path, o_img, o_img_path):
     cv2.line(img_cpy, (p0[0], p0[1]), (p1[0], p1[1]), color, lineType = cv2.CV_AA)
 
     patch = extract_patch(img_cpy, (center[0], center[1]), angle, distance * 2, distance * 2)
-    cv2.imwrite('../data/patches/patch_' + `line - 2` + '.jpg', patch)
+    cv2.imwrite('../data/patches/patch_' + `line - 1` + '.jpg', patch)
 
     cv2.line(o_img, (p0[0], p0[1]), (p1[0], p1[1]), color, lineType = cv2.CV_AA)
     cv2.imwrite(o_img_path, o_img)
@@ -116,7 +116,7 @@ def main(argv):
         reader = csv.reader(f)
         line = 0
         for row in reader:
-            if line > 1:
+            if line > 0:
                 row = parse_record(row, line, i_img_width, i_img_height, input_img, o_img, output_img)
             line +=1
 

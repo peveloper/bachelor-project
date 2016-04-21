@@ -1,4 +1,4 @@
-package.path = package.path .. ";/Users/stefanopeverelli/Documents/usi/6ths/Bachelor Project/scripts/?.lua;"
+package.path = package.path .. ";/Users/stefanopeverelli/Documents/usi/6ths/BachelorProject/scripts/?.lua;"
 
 require 'point'
 
@@ -62,7 +62,7 @@ saveData = function (traversed)
             Point.__tostring(toScreenCoords(initial_robot_pos, max_x / 2, -max_x / 2, max_y / 2, -max_y / 2 ), true),
             Point.__tostring(toScreenCoords(final_robot_pos, max_x / 2, -max_x / 2, max_y / 2, -max_y / 2 ), true),
         }
-        output_file = io.open("/Users/stefanopeverelli/Documents/usi/6ths/Bachelor Project/data/results/results.csv", "a")
+        output_file = io.open("/Users/stefanopeverelli/Documents/usi/6ths/BachelorProject/data/results/results.csv", "a")
         io.output(output_file)
         io.write(toCSV(record) .. "\n")
         io.close(output_file)
@@ -103,10 +103,6 @@ if (sim_call_type==sim_childscriptcall_initialization) then
     -- Read the robot velocity
     dVel = simGetStringParameter(sim_stringparam_app_arg2)
 
-    if (dVel == "") then
-        dVel = 1.0
-    end
-
     dSteer = 0.1
 
     --input steer
@@ -129,11 +125,9 @@ if (sim_call_type==sim_childscriptcall_initialization) then
     saved = false
 
     -- Read the maximum time for the simulation
-    max_sim_time = simGetStringParameter(sim_stringparam_app_arg3)
+    max_sim_time = tonumber(simGetStringParameter(sim_stringparam_app_arg3))
 
-    if (max_sim_time == "") then
-        max_sim_time = 10
-    end
+    output_file = simGetStringParameter(sim_stringparam_app_arg4)
 
     -- Compute the plane normal between two arbitrary vectors
     plane_normal = Point(1,1,0) ^ Point(1,2,0)
@@ -150,7 +144,6 @@ if (sim_call_type==sim_childscriptcall_initialization) then
 
     -- Get the initial robot orientation
     robot_direction = toDirection(simGetObjectOrientation(robot_handle, -1)[3])
-
 
     -- The final position is initialized as the start position 
     final_point_pos = initial_point_pos

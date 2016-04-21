@@ -1,6 +1,6 @@
 -- Main script that loads the default scenario to handle simulations with a given heighfield
 
-package.path = package.path .. ";/Users/stefanopeverelli/Documents/usi/6ths/Bachelor Project/scripts/?.lua;"
+package.path = package.path .. ";/Users/stefanopeverelli/Documents/usi/6ths/BachelorProject/scripts/?.lua;"
 require 'point'
 
 -- Get the Shape Bounding Box x y z coordinates
@@ -87,7 +87,7 @@ if (sim_call_type == sim_mainscriptcall_initialization) then
     simSetObjectName(path_handle, 'GOAL')
 
     -- Load the offroad mantra model with its associated script (controller)
-    simLoadModel('/Users/stefanopeverelli/Documents/usi/6ths/Bachelor Project/models/offroad.ttm')
+    simLoadModel('/Users/stefanopeverelli/Documents/usi/6ths/BachelorProject/models/offroad.ttm')
     robot_handle = simGetObjectHandle('ROBOT')
 
     -- Robot pose
@@ -99,10 +99,10 @@ if (sim_call_type == sim_mainscriptcall_initialization) then
 
     -- Goal point pose at distance d from the robot (NOTE distance cannot be bigger than the sqrt((max_x - 4) ^ 2 + (max_y - 4)^ 2) - 2)
     max_distance = math.sqrt((max_x - 4) ^ 2 + (max_y - 4)^ 2) - math.sqrt(max_x - 4) - 1
+
+    -- Read the distance parameter (default is 3)
     distance = simGetStringParameter(sim_stringparam_app_arg1)
-    if (distance == "" or tonumber(distance) >= max_distance) then
-        distance = math.sqrt(max_x)
-    end
+
     point_position = {Point.get(placePoint(distance, robot_direction, robot_position))}
 
     while not (isInPlane(point_position, max_x, max_y)) do

@@ -2,15 +2,23 @@
 
 VREP_PATH=~/Downloads/V-REP_PRO_EDU_V3_3_0_Mac/vrep.app/Contents/MacOS/ # MODIFY WITH YOUR VREP PATH
 LINUX=0 # SET TO 1 IF RUNNING ON LINUX
+USAGE="Usage ./simulate [-n <n_simulations>] -s <abs_path_to_scene_file.ttt> [-t <max_sim_time_in_ms] [-d <goal_distance>] [-v <robot_velocity>] -o <abs_path_to_utput_file>"
 
-while getopts "n:s:d:v:o:h:q:" opt; do
+while getopts "hn:s:t:d:v:o:" opt; do
   case $opt in
+    h)
+      # help
+      echo $USAGE ;
+      exit 1 ;;
     n)
       # number of simulations
       TIMES="$OPTARG" ;;
     s)
-        # scene to open (NOTE PROBLEM WITH SPACES IN THE PATH)
-      SCENE="$(echo $OPTARG | sed 's/ /\\ /g')" ;;
+      # scene to open (NOTE PROBLEM WITH SPACES IN THE PATH)
+      SCENE="$OPTARG" ;;
+    t)
+      # max simulation time (s)
+      MAX_T="$OPTARG" ;;
     d)
       # distance between the robot and the goal
       DIST="$OPTARG";;
@@ -21,9 +29,14 @@ while getopts "n:s:d:v:o:h:q:" opt; do
       # output file to save results of the simulations
       OUT="$OPTARG" ;;
     \?)
-      echo "Usage ./simulate [-n <n_simulations>] -s <scene_file.ttt> [-d <goal_distance>] [-v <robot_velocity>] -o <output_file>" ;;
+      echo $USAGE ;;
   esac
 done
+
+if [ -z "$TIMES" ];
+  then
+      TIMES=1;
+fi
 
 if [ -z "$SCENE" ];
   then
@@ -37,15 +50,20 @@ if [ -z "$OUT" ];
       exit 1
 fi
 
+if [ -z "$MAX_T" ];
+  then
+      MAX_T=10;
+fi
+
 if [ -z $DIST ];
   then
       DIST=3;
 fi
 
-# if [ -z $VEL ];
-#   then
-#       VEL=5;
-# fi
+if [ -z $VEL ];
+  then
+      VEL=1;
+fi
 
 if [ $LINUX -ne 0 ];
   then
@@ -54,15 +72,22 @@ if [ $LINUX -ne 0 ];
       VREP=./vrep;
 fi
 
-RUN="$VREP -g$DIST ${SCENE}"
-echo $RUN
+RUN="$VREP -h -q -s -g$DIST -g$VEL -g$MAX_T -g$OUT $SCENE"
+
+COMMAND="cd $VREP_PATH"
 
 if [ -f $OUT ]
   then
       while true; do
         read -p "$OUT already exists. Do you want to overwrite it? " yn
         case $yn in
-            [Yy]* ) cd $VREP_PATH && $RUN ; break;;
+            [Yy]* ) $COMMAND; 
+                for i in `seq 1 $TIMES`; 
+                    do
+                       $RUN &
+                    done
+                wait ;
+                break ;;
             [Nn]* ) exit;;
             * ) echo "Please answer yes or no.";;
         esac
@@ -72,6 +97,3 @@ if [ -f $OUT ]
     cd $VREP_PATH && $RUN ;
 fi
 
-# TODO add -s parameter when launching VREP, also to handle in main.lua
-# TODO add support for paths with spaces
-# TODO uncomment velocity and try to see if VREP launches correctly
