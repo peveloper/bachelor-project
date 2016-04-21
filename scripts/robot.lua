@@ -62,7 +62,7 @@ saveData = function (traversed)
             Point.__tostring(toScreenCoords(initial_robot_pos, max_x / 2, -max_x / 2, max_y / 2, -max_y / 2 ), true),
             Point.__tostring(toScreenCoords(final_robot_pos, max_x / 2, -max_x / 2, max_y / 2, -max_y / 2 ), true),
         }
-        output_file = io.open("/Users/stefanopeverelli/Documents/usi/6ths/Bachelor Project/data/results.csv", "a")
+        output_file = io.open("/Users/stefanopeverelli/Documents/usi/6ths/Bachelor Project/data/results/results.csv", "a")
         io.output(output_file)
         io.write(toCSV(record) .. "\n")
         io.close(output_file)

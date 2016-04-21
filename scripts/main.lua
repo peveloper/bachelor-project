@@ -23,7 +23,7 @@ end
 -- Compute a random coordinate between the bounding box of the shape
 getRandomCoordinate = function(max)
     -- max is decremented to avoid the car to be place on the border
-    return math.random() + math.random(-(max/2) +2 ,  (max/2) -2)
+    return math.random() + math.random(-(max/2) +1 ,  (max/2) -1)
 end
 
 -- Place the robot in a suitable position
@@ -40,7 +40,7 @@ end
 -- Check if a point is contained in the plane
 -- x and y are the point's 2d coordinates and max_x and max_ y are the bounding plane coordinates
 isInPlane = function(coords, max_x, max_y)
-    if(coords[1] <= (max_x/2) -2 and coords[1] >= -(max_x/2) +2) and (coords[2] <= (max_y/2) -2 and coords[2] >= -(max_y/2) +2) then
+    if(coords[1] <= (max_x/2) and coords[1] >= -(max_x/2)) and (coords[2] <= (max_y/2) and coords[2] >= -(max_y/2)) then
         return true
     end
 
