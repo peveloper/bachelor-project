@@ -1,7 +1,8 @@
--- Main script that loads the default scenario to handle simulations with a given heighfield
+-- Main script that loads the default scenario to handle simulations with a given heightfield
 
-package.path = package.path .. ";/Users/stefanopeverelli/Documents/usi/6ths/BachelorProject/scripts/?.lua;"
-require 'point'
+ABS_PATH = "/Users/stefanopeverelli/Documents/usi/6ths/BachelorProject/"; -- MODIFY WITH YOUR ABS PATH
+
+package.path = package.path .. ";" .. ABS_PATH .. "scripts/controller/?.lua;" require 'point'
 
 -- Get the Shape Bounding Box x y z coordinates
 getShapeMaxValues = function(shape_handle)
@@ -87,7 +88,8 @@ if (sim_call_type == sim_mainscriptcall_initialization) then
     simSetObjectName(path_handle, 'GOAL')
 
     -- Load the offroad mantra model with its associated script (controller)
-    simLoadModel('/Users/stefanopeverelli/Documents/usi/6ths/BachelorProject/models/offroad.ttm')
+    model_path = ABS_PATH .. 'models/offroad.ttm'
+    simLoadModel(model_path)
     robot_handle = simGetObjectHandle('ROBOT')
 
     -- Robot pose
