@@ -1,8 +1,23 @@
 #!/bin/bash
 
+get_abs_filename() {
+  # $1 : relative filename
+  echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
+}
+
 VREP_PATH=~/Downloads/V-REP_PRO_EDU_V3_3_0_Mac/vrep.app/Contents/MacOS/ # MODIFY WITH YOUR VREP PATH
 LINUX=0 # SET TO 1 IF RUNNING ON LINUX
-USAGE="Usage ./run_simulations [-n <n_simulations>] -s <abs_path_to_scene_file.ttt> [-t <max_sim_time_in_ms] [-d <goal_distance>] [-v <robot_velocity>] -o <abs_path_to_output_file>"
+USAGE="Usage ./run_simulations [-n <n_simulations>] -s <scene_filename> [-t <max_sim_time_in_ms] [-d <goal_distance>] [-v <robot_velocity>] -o <csv_filename>"
+SCENE_PATH="$(get_abs_filename "../scenes/")/"
+echo $SCENE_PATH
+
+OUT_PATH=$(get_abs_filename "../data/")
+if [ ! -d "$OUT_PATH" ]; then
+    mkdir "$OUT_PATH"
+fi
+OUT_PATH="$OUT_PATH/csv/"
+echo $OUT_PATH
+
 
 while getopts "hn:s:t:d:v:o:" opt; do
   case $opt in
@@ -72,9 +87,19 @@ if [ $LINUX -ne 0 ];
       VREP=./vrep;
 fi
 
-RUN="$VREP -s -g$DIST -g$VEL -g$MAX_T -g$OUT $SCENE"
+
+if [ ! -d "$OUT_PATH" ]; then
+    mkdir "$OUT_PATH"
+fi
+
+SCENE="$SCENE_PATH$SCENE"
+OUT="$OUT_PATH$OUT"
+
+RUN="$VREP -q  -s -g$DIST -g$VEL -g$MAX_T -g$OUT $SCENE"
 
 COMMAND="cd $VREP_PATH"
+
+
 
 if [ -f $OUT ]
   then
@@ -105,11 +130,20 @@ if [ -f $OUT ]
   else
     echo "TRAVERSED, ELAPSED_TIME, GOAL, R_I, R_F" > $OUT;
     $COMMAND
-    for i in `seq 1 $TIMES`; 
+    DIV=$(($TIMES/100));
+    REM=$(($TIMES-$DIV * 100));
+    while [ $DIV -gt 0 ]; do
+        for i in `seq 1 100`; 
+            do
+               $RUN &
+            done
+        wait ;
+        DIV=$(($DIV-1));
+    done
+    for i in `seq 1 $REM`; 
         do
-            $RUN &
+           $RUN &
         done
     wait ;
-
 fi
 

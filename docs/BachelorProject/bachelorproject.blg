@@ -1,0 +1,55 @@
+This is BibTeX, Version 0.99d (TeX Live 2015)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: bachelorproject.aux
+The style file: plain.bst
+Database file #1: references.bib
+Warning--empty journal in tofc
+Warning--empty year in tofc
+Warning--empty journal in Kim
+Warning--empty year in Kim
+Warning--empty journal in raphael
+Warning--empty year in raphael
+Warning--empty journal in bellone
+Warning--empty year in bellone
+You've used 11 entries,
+            2118 wiz_defined-function locations,
+            544 strings with 5603 characters,
+and the built_in function-call counts, 3226 in all, are:
+= -- 274
+> -- 195
+< -- 0
++ -- 79
+- -- 68
+* -- 219
+:= -- 567
+add.period$ -- 26
+call.type$ -- 11
+change.case$ -- 67
+chr.to.int$ -- 0
+cite$ -- 19
+duplicate$ -- 111
+empty$ -- 248
+format.name$ -- 68
+if$ -- 634
+int.to.chr$ -- 0
+int.to.str$ -- 11
+missing$ -- 8
+newline$ -- 51
+num.names$ -- 22
+pop$ -- 100
+preamble$ -- 1
+purify$ -- 56
+quote$ -- 0
+skip$ -- 80
+stack$ -- 0
+substring$ -- 117
+swap$ -- 9
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 44
+warning$ -- 8
+while$ -- 26
+width$ -- 13
+write$ -- 94
+(There were 8 warnings)

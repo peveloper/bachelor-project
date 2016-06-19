@@ -1,8 +1,13 @@
 -- Main script that loads the default scenario to handle simulations with a given heightfield
 
-ABS_PATH = "/Users/stefanopeverelli/Documents/usi/6ths/BachelorProject/"; -- MODIFY WITH YOUR ABS PATH
+function script_path()
+   local str = debug.getinfo(2, "S").source:sub(2)
+   return str:match("(.*/)")
+end
 
-package.path = package.path .. ";" .. ABS_PATH .. "scripts/controller/?.lua;" require 'point'
+ABS_PATH = script_path()
+
+package.path = package.path .. ";" .. ABS_PATH .. "controller/?.lua;" require 'point'
 
 -- Get the Shape Bounding Box x y z coordinates
 getShapeMaxValues = function(shape_handle)
@@ -20,6 +25,8 @@ getShapeMaxValues = function(shape_handle)
     local zSize = localzMinMax[2] - localzMinMax[1]
     return {xSize, ySize, zSize}
 end
+
+
 
 -- Compute a random coordinate between the bounding box of the shape
 getRandomCoordinate = function(max)
@@ -82,18 +89,20 @@ if (sim_call_type == sim_mainscriptcall_initialization) then
     simCreatePath(1, intParams, floatParams, nil)
     path_handle = simGetObjectHandle('Path', -1)
     ctrlPoint1 = {0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1}
-    ctrlPoint2 = {0, 0, max_z, 0, 0, 0, 1, 0, 0, 1, 1}
+    ctrlPoint2 = {0, 0, max_z + 1, 0, 0, 0, 1, 0, 0, 1, 1}
     simInsertPathCtrlPoints(path_handle, 0, 0, 1, ctrlPoint1);
     simInsertPathCtrlPoints(path_handle, 0, 0, 1, ctrlPoint2);
     simSetObjectName(path_handle, 'GOAL')
 
+
+
     -- Load the offroad mantra model with its associated script (controller)
-    model_path = ABS_PATH .. 'models/offroad.ttm'
+    model_path = ABS_PATH .. '../models/offroad.ttm'
     simLoadModel(model_path)
     robot_handle = simGetObjectHandle('ROBOT')
 
     -- Robot pose
-    placeRobot(max_x, max_y, max_z)
+    placeRobot(max_x, max_y, max_z + 0.3)
     robot_position = simGetObjectPosition(robot_handle, -1)
     robot_position[3] = 0
     robot_position = toPoint(robot_position)

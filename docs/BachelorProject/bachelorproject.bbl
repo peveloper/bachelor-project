@@ -1,0 +1,58 @@
+\begin{thebibliography}{10}
+
+\bibitem{tofc}
+G.~De Cubber D. Doroftei H. Sahli~Y. Baudoin.
+\newblock Outdoor terrain traversability analysis for robot navigation using a
+  time-of-flight camera.
+
+\bibitem{Kim}
+Dongshin Kim Jie Sun Sang Min Oh James M. Rehg Aaron~F. Bobick.
+\newblock Traversability classification using unsupervised on-line visual
+  learning for outdoor robot navigation.
+
+\bibitem{vrep}
+M.~Freese E.~Rohmer, S. P. N.~Singh.
+\newblock V-rep: a versatile and scalable robot simulation framework.
+\newblock In {\em Proc. of The International Conference on Intelligent Robots
+  and Systems (IROS)}, 2013.
+
+\bibitem{mle}
+Y~X Fu and W~H Li.
+\newblock Maximum likelihood estimation of population parameters.
+\newblock {\em Genetics}, 134(4):1261--1270, 1993.
+
+\bibitem{numpy}
+Travis~E. Oliphant.
+\newblock Python for scientific computing, computing in science \& engineering,
+  2007--.
+
+\bibitem{scikit-learn}
+F.~Pedregosa, G.~Varoquaux, A.~Gramfort, V.~Michel, B.~Thirion, O.~Grisel,
+  M.~Blondel, P.~Prettenhofer, R.~Weiss, V.~Dubourg, J.~Vanderplas, A.~Passos,
+  D.~Cournapeau, M.~Brucher, M.~Perrot, and E.~Duchesnay.
+\newblock Scikit-learn: Machine learning in {P}ython.
+\newblock {\em Journal of Machine Learning Research}, 12:2825--2830, 2011.
+
+\bibitem{ROS}
+Morgan Quigley, Ken Conley, Brian Gerkey, Josh Faust, Tully~B. Foote, Jeremy
+  Leibs, Rob Wheeler, and Andrew~Y. Ng.
+\newblock {ROS}: an open-source robot operating system.
+\newblock In {\em ICRA Workshop on Open Source Software}, 2009.
+
+\bibitem{raphael}
+Didier~Aubert Raphael~Labayrade.
+\newblock In-vehicle obstacles detection and characterization by stereovision.
+
+\bibitem{bellone}
+Mauro Bellone Giulio Reina Nicola Ivan Giannoccaro~Luigi Spedicato.
+\newblock 3d traversability awareness for rough terrain mobile robots.
+
+\bibitem{imu}
+Wikipedia.
+\newblock Inertial measurement unit.
+
+\bibitem{pca}
+Wikipedia.
+\newblock Principal component analysis.
+
+\end{thebibliography}

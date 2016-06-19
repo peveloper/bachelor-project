@@ -1,0 +1,16 @@
+Introduction
+
+Autonomous vehicles in unstructured outdoor environment need to estimate the traversability of the terrain.
+"Explain the concept of traversability" - A terrain is said to be traversable if a vehicle can reach a goal point, starting from an initial position.
+This thesis presents a new approach based on simulation and machine learning to predict whether a given 3D region is traversable by a simple ground robot.
+The proposed approach has two main phases: the first consists of simulating a robot that traverses a 3D terrain in a virtual environment, determine 
+in which areas it got stuck or capsized, and collect data from the simulations to obtain an extensive dataset of possible outcomes. 
+The second phase instead aims to analyze the resulting dataset and use it to train a neural network model, whose purpose is, to judge the 
+traversability of a terrain (by its 3D structure), and plan a path the robot can traverse.
+By using an approach based on machine learning, there’s no need to manually define heuristic rules to predict the traversability of terrain patches; 
+moreover, the approach is applicable to any type of ground robot (wheeled/legged) as long as it can be reliably simulated.
+
+Simulation
+
+A main assumption of this approach is that a terrain map is available at priori (e.g. 3D radar surface reconstruction). 
+

@@ -1,6 +1,11 @@
-ABS_PATH = "/Users/stefanopeverelli/Documents/usi/6ths/BachelorProject/"
+function script_path()
+   local str = debug.getinfo(2, "S").source:sub(2)
+   return str:match("(.*/)")
+end
 
-package.path = package.path .. ";" .. ABS_PATH .. "scripts/controller/?.lua;"
+ABS_PATH = script_path()
+
+package.path = package.path .. ";" .. ABS_PATH .. "?.lua;"
 
 require 'point'
 
@@ -119,8 +124,8 @@ if (sim_call_type==sim_childscriptcall_initialization) then
     -- Define an angle tolerance
     epsilon = 0.02
 
-    -- Define a radius for the area of interest
-    radius = 0.7
+    -- Define a radius for the area of interest (TODO adapt to distane)
+    radius = 0.6
 
     traversed = 0
 
@@ -155,11 +160,15 @@ if (sim_call_type==sim_childscriptcall_initialization) then
 
 end
 
+local function sqr(x) return x*x end
+
+
 -- Check if the robot has reached the goal
 isInAreaOfInterest = function(robot_pos, goal_point_pos)
     -- Compute vector from goal point to robot position
-    distance_vector = goal_point_pos - robot_pos
-    distance = Point.len(distance_vector)
+    -- distance_vector = goal_point_pos - robot_pos
+    distance_vector = {goal_point_pos[1] - robot_pos[1], goal_point_pos[2] - robot_pos[2]}
+    distance = math.sqrt(sqr(distance_vector[1]) + sqr(distance_vector[2]))
     if (distance <= radius) then
         return true
     end
